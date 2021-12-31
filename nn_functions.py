@@ -68,13 +68,13 @@ def nn_cost_function(nn_params,input_layer_size,hidden_layer_size,num_labels,
     theta_2 = nn_params[hidden_layer_size*
                         (input_layer_size+1):len(nn_params)+1]
 
-    theta_1 = theta_1.reshape(hidden_layer_size,input_layer_size+1,order='F')
-    theta_2 = theta_2.reshape(num_labels,hidden_layer_size+1,order='F')
+    theta_1 = theta_1.reshape(hidden_layer_size,input_layer_size+1)
+    theta_2 = theta_2.reshape(num_labels,hidden_layer_size+1)
     
     J = 0                                  # Cost
     m = x.shape[0]                         # Number of examples
     
-    # Feedforward neural network and return cost in variable J
+    # Feedforward pass neural network and return cost in variable J
     
     x = np.append(np.ones((m,1)),x,axis=1) # add bias to design matrix
     
@@ -94,11 +94,11 @@ def nn_cost_function(nn_params,input_layer_size,hidden_layer_size,num_labels,
     y_matrix = np.zeros((m,num_classes)) # create a label vector for each ex
     
     for i in range(0,y_matrix.shape[0]):
-        k = int(y[i])            # training label (i.e. 5 indicates 5th class)
-        y_matrix[i,k-1] = 1  # indicate the correct class by putting a 1
+        k = int(y[i])            # training label (matrix = 0, fiber = 1)
+        y_matrix[i,k] = 1  # indicate the correct class by putting a 1
         # In other words, each row corresponds to each example 
         # in each row, there exists a 1 in the position corresponding
-        # to correct class. (i.e. 5 would have a 1 in the 4th index)
+        # to correct class. (i.e. index 1 would have a 1 for fiber)
         
     # Compute cost for each training example     
     for i in range(0,y_matrix.shape[0]):
@@ -114,7 +114,7 @@ def nn_cost_function(nn_params,input_layer_size,hidden_layer_size,num_labels,
     
     # Regularization (adding penalty to cost function)
     # Extract the weights, not including the bias term since its not 
-    # kosher to regularize the bias unit
+    # proper to regularize the bias unit
     theta_1_no_bias_unit = theta_1[:,1:theta_1.shape[1]+1]
     theta_2_no_bias_unit = theta_2[:,1:theta_2.shape[1]+1]
     
@@ -137,14 +137,13 @@ def gradient(nn_params,input_layer_size,hidden_layer_size,num_labels,
     algorithm. Return grad as an unrolled vector for optimization function.
     
     """
-    
     # Reshape parameters back into weight matrices
     theta_1 = nn_params[0:hidden_layer_size*(input_layer_size+1)]
     theta_2 = nn_params[hidden_layer_size*
                         (input_layer_size+1):len(nn_params)+1]
 
-    theta_1 = theta_1.reshape(hidden_layer_size,input_layer_size+1,order='F')
-    theta_2 = theta_2.reshape(num_labels,hidden_layer_size+1,order='F')
+    theta_1 = theta_1.reshape(hidden_layer_size,input_layer_size+1)
+    theta_2 = theta_2.reshape(num_labels,hidden_layer_size+1)
     
     J = 0                                  # Cost
     m = x.shape[0]                         # Number of examples
@@ -157,11 +156,11 @@ def gradient(nn_params,input_layer_size,hidden_layer_size,num_labels,
     y_matrix = np.zeros((m,num_classes)) # create a label vector for each ex
     
     for i in range(0,y_matrix.shape[0]):
-        k = int(y[i])            # training label (i.e. 5 indicates 5th class)
-        y_matrix[i,k-1] = 1  # indicate the correct class by putting a 1
+        k = int(y[i])            # training label (matrix = 0, fiber = 1)
+        y_matrix[i,k] = 1  # indicate the correct class by putting a 1
         # In other words, each row corresponds to each example 
         # in each row, there exists a 1 in the position corresponding
-        # to correct class. (i.e. 5 would have a 1 in the 4th index)
+        # to correct class. (i.e. index 1 would have a 1 for fiber)
         
     # Backpropagation Algorithm
     delta_1 = 0
@@ -213,9 +212,9 @@ def gradient(nn_params,input_layer_size,hidden_layer_size,num_labels,
             lambda_reg/m*theta_2[:,1:theta_2.shape[1]]
     
     # Neural network cost function gradient, used for training - necessary
-    # to minimize the cost function by modyfing parameters        
-    grad = np.append(theta_1_grad.reshape(theta_1_grad.size,order='F'),
-                 theta_2_grad.reshape(theta_2_grad.size,order='F'),axis=0) 
+    # to minimize the cost function by modifying parameters        
+    grad = np.append(theta_1_grad.reshape(theta_1_grad.size),
+                 theta_2_grad.reshape(theta_2_grad.size),axis=0) 
     
     return grad
     
@@ -243,7 +242,7 @@ def nn_gradient_descent(nn_params,input_layer_size,hidden_layer_size,
     Performs gradient descent to learn parameters / weight matrices between
     layers. Takes num_iters gradient steps with alpha learning rate.
     
-    Note: I never tested this algorithm, always used scipy.minimize
+    Note: I never tested this algorithm, always used scipy.minimize to learn.
     
     """
     m = y.shape[0]
@@ -270,7 +269,7 @@ def nn_gradient_descent(nn_params,input_layer_size,hidden_layer_size,
     return optim_nn_params
               
 
-def display_data(x, example_width=None, figsize=(10, 10)):
+def display_data(x, example_height,example_width, figsize=(10, 10)):
     """
     
     Displays 2D data stored in X in a nice grid. Code copied from
@@ -288,10 +287,7 @@ def display_data(x, example_width=None, figsize=(10, 10)):
         x = x[None]  # Promote to a 2 dimensional array
     else:
         raise IndexError('Input X should be 1 or 2 dimensional.')
-
-    example_width = example_width or int(np.round(np.sqrt(n)))
-    example_height = n / example_width
-
+    
     # Compute number of items to display
     display_rows = int(np.floor(np.sqrt(m)))
     display_cols = int(np.ceil(m / display_rows))
@@ -303,6 +299,5 @@ def display_data(x, example_width=None, figsize=(10, 10)):
 
     for i, ax in enumerate(ax_array):
         # Display Image
-        h = ax.imshow(x[i].reshape(example_width, example_width, order='F'),
-                      cmap='Greys', extent=[0, 1, 0, 1])
+        h = ax.pcolormesh(x[i].reshape(example_height,example_width))
         ax.axis('off')
