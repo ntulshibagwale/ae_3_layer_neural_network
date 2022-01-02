@@ -280,6 +280,66 @@ def compute_accuracy(theta_1,theta_2,x,y):
     
     return accuracy
     
+def compute_precision(theta_1,theta_2,x,y,pos_class):
+    """
+    
+    Evaluation metric for skewed classification problem:
+        
+        Predicted True Positives / # Predicted as Positive
+        Predicted True Positives / (Actual True Positives + False Positives)
+        
+    Ex: If diagnosing cancer patients - for all the patients predicted to have
+    cancer (y=1) what fraction of those patients actually have cancer. The 
+    positive_class is the class for computing, i.e. 1 would be used for fiber.
+    
+    Source: Andrew Ng ML Course
+    
+    """
+    model_prediction = predict(theta_1,theta_2,x)
+    predicted_true_positives = sum((model_prediction==pos_class) ==
+                                   (y==pos_class))
+    predicted_positives = sum(model_prediction == pos_class)
+    precision = predicted_true_positives / predicted_positives
+    
+    return precision
+    
+def compute_recall(theta_1,theta_2,x,y,pos_class):
+    """
+    
+    Evaluation metric for skewed classification problem:
+        
+        Predicted True Positives / # Actual Positives
+        Predicted True Positives / (Actual True Positives + False Negatives)
+    
+    Ex: If diagnosing cancer patients - for all the patients that actually have
+    cancer, what fraction of them were correctly detected to have cancer.
+    
+    Source: Andrew Ng ML Course
+
+    """
+    model_prediction = predict(theta_1,theta_2,x)
+    predicted_true_positives = sum((predict(theta_1,theta_2,x)==pos_class)
+                                   == (y==pos_class))
+    actual_positives = sum(y==pos_class)
+    recall = predicted_true_positives / actual_positives
+    
+    return recall
+    
+def compute_f1_score(theta_1,theta_2,x,y,pos_class):
+    """
+    
+    Evaluation metric for skewed classification problem. Combines recall and
+    precision metric into single number. Since there is tradeoff between the 
+    two metrics.
+    
+        2 * Precision * Recall / (Precision + Recall)
+        
+    """
+    P = compute_precision(theta_1, theta_2, x, y, pos_class)
+    R = compute_recall(theta_1, theta_2, x, y, pos_class)
+    f1_score = 2 * P * R / (P + R)
+    
+    return f1_score
     
 def display_data(x, example_height,example_width, figsize=(10, 10)):
     """

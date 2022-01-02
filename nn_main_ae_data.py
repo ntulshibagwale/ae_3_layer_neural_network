@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 from nn_functions import *
 from acoustic_emission_dataset import AcousticEmissionDataset
+import sklearn.metrics as metric
 
 if __name__=='__main__':
     
@@ -32,12 +33,12 @@ if __name__=='__main__':
     FNAME = '210330-1'       # File name ; '210308-1','210316-1','210330-1'
     
     # Hyperparameters
-    LAMBDA_REG = 1;           # Regularization / cost penalty
+    LAMBDA_REG = 3;           # Regularization / cost penalty
     N_FFT = 256               # Number of samples per frame of stft    
     HOP_LENGTH = N_FFT+1      # Number of samples between frame of stft
     TEST_PERC = 0.2           # Percentage of labeled data used for test
     TRAIN_PERC = 1-TEST_PERC  # Percentage of labeled data used for training
-    NUM_ITERATIONS = 100      # Number of iterations for minimize cost
+    NUM_ITERATIONS = 2000      # Number of iterations for minimize cost
     
     # 3 Layer NN - Define layer sizes
     INPUT_LAYER_SIZE  = 15*4  # Computed from spectrogram output (DOUBLE CHECK)
@@ -112,19 +113,24 @@ if __name__=='__main__':
     optim_theta_2 = optim_theta_2.reshape(NUM_LABELS,HIDDEN_LAYER_SIZE+1)
                                           
     print("__________________________________________________________________")
-    print("Training completed, parameters optimized on training data")
+    print("Training completed, parameters optimized on training data.\n")
     
     " ----- Evaluation -------------------------------------------------------"
     
-    # How accurate is model on training data?
-    model_accuracy_train = \
-        compute_accuracy(optim_theta_1,optim_theta_2,x_train,y_train)
-    print(f"Model accuracy on training data: {model_accuracy_train} %")
-
-    # How accurate is model on test data? (Data not used in learning)
-    model_accuracy_test = \
-        compute_accuracy(optim_theta_1,optim_theta_2,x_test,y_test)
-    print(f"Model accuracy on test data: {model_accuracy_test} %")
+    labels = ['matrix','fiber']
+    y_pred_train = predict(optim_theta_1,optim_theta_2,x_train)
+    y_pred_test = predict(optim_theta_1,optim_theta_2,x_test)
+    
+    # How accurate is model on training data? ---------------------------------
+    print("\nTraining data evaluation:\n")
+    print(metric.classification_report(y_train,y_pred_train,
+                                       target_names=labels))
+   
+    # How accurate is model on test data? (Data not used in learning) ---------
+    print("\nTest data evaluation:\n")
+    print(metric.classification_report(y_test,y_pred_test,
+                                       target_names=labels))
+    
     
     # Visualize the weights between input layer and hidden layer
     display_data(optim_theta_1[:,1:],  # get rid of bias unit
