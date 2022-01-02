@@ -172,7 +172,7 @@ class AcousticEmissionDataset(Dataset):
         # https://librosa.org/doc/latest/generated/librosa.fft_frequencies.html
         freq = librosa.fft_frequencies(sr=self.sr,n_fft=self.n_fft)
         
-        # Filter 
+        # Filter spectra below low and above high
         if self.low is not None:
             spectrogram = spectrogram[np.where(freq > self.low)]
             freq = freq[np.where(freq > self.low)]

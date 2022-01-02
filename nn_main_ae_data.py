@@ -7,7 +7,7 @@ nn_main_ae_data
 
 3 layer neural network coded 'from scratch' using Andrew Ng course, translated
 from MATLAB. Originally, used to recognized hand written digits. Attempt to use
-for acoustic emissions training.
+for training on acoustic data.
  
 """
 
@@ -111,22 +111,19 @@ if __name__=='__main__':
     optim_theta_1 = optim_theta_1.reshape(HIDDEN_LAYER_SIZE,INPUT_LAYER_SIZE+1)
     optim_theta_2 = optim_theta_2.reshape(NUM_LABELS,HIDDEN_LAYER_SIZE+1)
                                           
-
     print("__________________________________________________________________")
     print("Training completed, parameters optimized on training data")
     
     " ----- Evaluation -------------------------------------------------------"
     
     # How accurate is model on training data?
-    model_predict_train = predict(optim_theta_1,optim_theta_2,x_train)
-    model_accuracy_train =\
-        np.count_nonzero(model_predict_train==y_train)/y_train.shape[0]*100
+    model_accuracy_train = \
+        compute_accuracy(optim_theta_1,optim_theta_2,x_train,y_train)
     print(f"Model accuracy on training data: {model_accuracy_train} %")
 
     # How accurate is model on test data? (Data not used in learning)
-    model_predict_test = predict(optim_theta_1,optim_theta_2,x_test)
-    model_accuracy_test =\
-        np.count_nonzero(model_predict_test==y_test)/y_test.shape[0]*100
+    model_accuracy_test = \
+        compute_accuracy(optim_theta_1,optim_theta_2,x_test,y_test)
     print(f"Model accuracy on test data: {model_accuracy_test} %")
     
     # Visualize the weights between input layer and hidden layer

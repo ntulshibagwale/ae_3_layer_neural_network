@@ -127,7 +127,7 @@ def nn_cost_function(nn_params,input_layer_size,hidden_layer_size,num_labels,
     print(f"Cost: {J}")
     
     return J
-        
+
     
 def gradient(nn_params,input_layer_size,hidden_layer_size,num_labels,
                      x,y,lambda_reg):
@@ -268,7 +268,19 @@ def nn_gradient_descent(nn_params,input_layer_size,hidden_layer_size,
         
     return optim_nn_params
               
-
+def compute_accuracy(theta_1,theta_2,x,y):
+    """
+    
+    Given the weights (3 layer) and the features, computes the model's 
+    predictions and compares to labeled data. Returns the percentage.
+    
+    """
+    model_prediction = predict(theta_1,theta_2,x)
+    accuracy = np.count_nonzero(model_prediction==y)/y.shape[0]*100
+    
+    return accuracy
+    
+    
 def display_data(x, example_height,example_width, figsize=(10, 10)):
     """
     
